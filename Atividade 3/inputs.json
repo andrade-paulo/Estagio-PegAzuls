@@ -1,0 +1,20 @@
+{
+    "prop_comuns": {
+        "fator_seguranca": 1.5,
+        "base": 1.07
+    },
+    "balsa_retangular": {
+        "tensao_esc_flexao": 31.33,
+        "tensao_esc_cisalhamento": 0,
+        "densidade": 0.00014,
+        "espessura": 2,
+        "prop_comuns": "@propriedades_comuns"
+    },
+    "aluminio_circular": {
+        "tensao_esc_flexao": 244,
+        "tensao_esc_cisalhamento": 125,
+        "densidade": 0.00238,
+        "espessura": 1,
+        "prop_comuns": "@propriedades_comuns"
+    }
+}
