@@ -5,7 +5,7 @@
     },
     "balsa_retangular": {
         "tensao_esc_flexao": 31.33,
-        "tensao_esc_cisalhamento": 0,
+        "tensao_esc_cisalhamento": 28.43,
         "densidade": 0.00014,
         "espessura": 2,
         "prop_comuns": "@propriedades_comuns"
