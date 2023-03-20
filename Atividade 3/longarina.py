@@ -6,17 +6,21 @@ with open(r'.\inputs.json', 'r') as f:
     dados = json.load(f)
 
 
+# -=-=-=-=-=- FUNÇÕES -=-=-=-=-=-
+
 # Função para generalizar os cálculos das integrais
 def integral(valores_referencia):  # Recebe uma lista
     resultados_por_grau = [0]
 
     for i in range(1, len(valores_referencia) + 1):  # Adapta dinamicamente conforme a quantidade de itens
         resultados_por_grau.append(valores_referencia[i - 1] / i)
-        resultados_por_grau[0] += -(resultados_por_grau[i] * pow(dados["prop_comuns"]["envergadura"], i))  # Valor máximo
+        resultados_por_grau[0] += -(
+                    resultados_por_grau[i] * pow(dados["prop_comuns"]["envergadura"], i))  # Valor máximo
 
     return resultados_por_grau  # Retorna uma lista
 
 
+# Função para calcular as longarinas
 def calcular_longarina(material, configuracao):
     # Integrais
     valor_por_grau = [112.4, 31.93, -589.8, 2607, -5689, 5779, -2231]  # O índice corresponde ao grau
@@ -36,11 +40,15 @@ def calcular_longarina(material, configuracao):
     tensao_cisalhamento = tensao_admissivel_cisalhamento + 1
     tensao_flexao = tensao_admissivel_flexao + 1
 
-    if configuracao == "circular" :
+    # Variáveis usadas no top10
+    contador = 1
+    top10 = []
+
+    if configuracao == "circular":  # Tipo circular
         raio_externo = 6
 
         # Procura pelo melhor peso
-        while tensao_cisalhamento > tensao_admissivel_cisalhamento or tensao_flexao > tensao_admissivel_flexao:
+        while contador <= 10:
             # Calculos das dimensões
             raio_interno = raio_externo - 1
 
@@ -63,18 +71,20 @@ def calcular_longarina(material, configuracao):
 
             raio_externo += 0.00001  # Novo raio a ser testado
 
-        return {"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
-                "tensao_admissivel_cislhamento": tensao_admissivel_cisalhamento,
-                "tensao_admissivel_flexao": tensao_admissivel_flexao,
-                "inercia": inercia, "diametro_externo": diametro_externo,
-                "area_circular": area_circular, "massa": massa}
+            if tensao_cisalhamento < tensao_admissivel_cisalhamento and tensao_flexao < tensao_admissivel_flexao:
+                contador += 1  # Conta a quantidade de casos registrados para o top10
 
-    elif configuracao == "caixao" :
-        # TODO: descobrir os limites e proporções
+                top10.append({"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
+                              "tensao_admissivel_cisalhamento": tensao_admissivel_cisalhamento,
+                              "tensao_admissivel_flexao": tensao_admissivel_flexao,
+                              "inercia": inercia, "diametro_externo": diametro_externo,
+                              "area_circular": area_circular, "massa": massa})
+
+    elif configuracao == "caixao":  # Tipo caixão
         largura = 1
         altura = 40
 
-        while tensao_cisalhamento > tensao_admissivel_cisalhamento or tensao_flexao > tensao_admissivel_flexao:
+        while contador <= 10:
             # Calculos das dimensões
             area_retangular = largura * altura - ((largura - (2 * dados[material]["espessura"]))
                                                   * (altura - (2 * dados[material]["espessura"])))
@@ -90,21 +100,26 @@ def calcular_longarina(material, configuracao):
 
             tensao_flexao = (momento_fletor[0] * 1000 * (altura / 2)) / inercia
 
-            altura += 0.01  # Nova altura a ser testada
-            largura += 0.01  # Nova largura a ser testada
+            # Acrescenta largura após a altura atingir o máximo
+            if altura < 50:
+                altura += 0.5  # Nova altura a ser testada
+            else:
+                largura += 0.01  # Nova largura a ser testada
 
-        return {"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
-                "tensao_admissivel_cislhamento": tensao_admissivel_cisalhamento,
-                "tensao_admissivel_flexao": tensao_admissivel_flexao,
-                "inercia": inercia, "largura": largura, "altura": altura,
-                "area_retangula": area_retangular, "massa": massa}
-    
-    elif configuracao == "retangular":
-        # TODO: descobrir os limites e proporções
-        largura = 0.5 
+            if tensao_cisalhamento < tensao_admissivel_cisalhamento and tensao_flexao < tensao_admissivel_flexao:
+                contador += 1  # Conta a quantidade de casos registrados para o top10
+
+                top10.append({"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
+                              "tensao_admissivel_cisalhamento": tensao_admissivel_cisalhamento,
+                              "tensao_admissivel_flexao": tensao_admissivel_flexao,
+                              "inercia": inercia, "largura": largura, "altura": altura,
+                              "area_retangula": area_retangular, "massa": massa})
+
+    elif configuracao == "retangular":  # Tipo retangular
+        largura = 0.5
         altura = 20
 
-        while tensao_cisalhamento > tensao_admissivel_cisalhamento or tensao_flexao > tensao_admissivel_flexao:
+        while contador <= 10:
             # Calculos das dimensões
             area_retangular = largura * altura
 
@@ -117,40 +132,46 @@ def calcular_longarina(material, configuracao):
 
             tensao_flexao = (momento_fletor[0] * 1000 * (altura / 2)) / inercia
 
-            altura += 0.01  # Nova altura a ser testada
-            largura += 0.01  # Nova largura a ser testada
+            # Acrescenta largura após a altura atingir o máximo
+            if altura < 50:
+                altura += 0.5  # Nova altura a ser testada
+            else:
+                largura += 0.01  # Nova largura a ser testada
 
-        return {"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
-                "tensao_admissivel_cislhamento": tensao_admissivel_cisalhamento,
-                "tensao_admissivel_flexao": tensao_admissivel_flexao,
-                "inercia": inercia, "largura": largura, "altura": altura,
-                "area_retangula": area_retangular, "massa": massa}
+            if tensao_cisalhamento < tensao_admissivel_cisalhamento and tensao_flexao < tensao_admissivel_flexao:
+                contador += 1  # Conta a quantidade de casos registrados para o top10
+
+                top10.append({"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
+                              "tensao_admissivel_cisalhamento": tensao_admissivel_cisalhamento,
+                              "tensao_admissivel_flexao": tensao_admissivel_flexao,
+                              "inercia": inercia, "largura": largura, "altura": altura,
+                              "area_retangula": area_retangular, "massa": massa})
+
+    return top10
 
 
-print("-=-=- Alumínio Circular -=-=-")
-aluminio = calcular_longarina("aluminio","circular")
-for i in aluminio:
-    print(f"{i}: {aluminio[i]}")
+# Função para formatar as saídas
+def exibir_resultados(lista_de_resultados):
+    for i in lista_de_resultados:
+        for j in i:
+            print(f"{j}: {i[j]}")
+        print()
 
-print ()
 
-print("-=-=- Alumínio Retangular -=-=-")
-aluminio_retangular = calcular_longarina("aluminio","retangular")
-for i in aluminio_retangular:
-    print(f"{i}: {aluminio_retangular[i]}")
+# -=-=-=-=-=- OUTPUTS -=-=-=-=-=-
 
-print ()    
+print("\033[92m-=-=- Alumínio Circular -=-=-\033[0m")
+aluminio_circular = calcular_longarina("aluminio", "circular")
+exibir_resultados(aluminio_circular)
 
-print("-=-=- Carbono Circular -=-=-")
-carbono = calcular_longarina("carbono","circular")
-for i in carbono:
-    print(f"{i}: {carbono[i]}")
+print("\033[92m-=-=- Alumínio Retangular -=-=-\033[0m")
+aluminio_retangular = calcular_longarina("aluminio", "retangular")
+exibir_resultados(aluminio_retangular)
 
-print()
+print("\033[92m-=-=- Carbono Circular -=-=-\033[0m")
+carbono_circular = calcular_longarina("carbono", "circular")
+exibir_resultados(carbono_circular)
 
-print("-=-=- Balsa Retangular Caixão -=-=-")
-balsa = calcular_longarina("balsa","caixao")
-for i in balsa:
-    print(f"{i}: {balsa[i]}")
-
- 
+print("\033[92m-=-=- Balsa Retangular Caixão -=-=-\033[0m")
+balsa_caixao = calcular_longarina("balsa", "caixao")
+exibir_resultados(balsa_caixao)
