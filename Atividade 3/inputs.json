@@ -1,20 +1,31 @@
 {
     "prop_comuns": {
         "fator_seguranca": 1.5,
-        "base": 1.07
+        "envergadura": 1.07
     },
-    "balsa_retangular": {
+    "balsa": {
         "tensao_esc_flexao": 31.33,
         "tensao_esc_cisalhamento": 28.43,
         "densidade": 0.00014,
         "espessura": 2,
         "prop_comuns": "@propriedades_comuns"
     },
-    "aluminio_circular": {
+           
+    "aluminio": {
         "tensao_esc_flexao": 244,
         "tensao_esc_cisalhamento": 125,
         "densidade": 0.00238,
         "espessura": 1,
         "prop_comuns": "@propriedades_comuns"
+    },
+    "carbono": {
+        "tensao_esc_flexao": 240,
+        "tensao_esc_cisalhamento": 125,
+        "densidade": 0.0018,
+        "espessura": 1,
+        "prop_comuns": "@propriedades_comuns" 
+
     }
+
 }
+

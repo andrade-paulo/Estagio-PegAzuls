@@ -2,7 +2,7 @@ from math import pi
 import json
 
 # Carregamento das informações do JSON na variável dados
-with open('./inputs.json', 'r') as f:
+with open(r'.\inputs.json', 'r') as f:
     dados = json.load(f)
 
 
@@ -12,12 +12,12 @@ def integral(valores_referencia):  # Recebe uma lista
 
     for i in range(1, len(valores_referencia) + 1):  # Adapta dinamicamente conforme a quantidade de itens
         resultados_por_grau.append(valores_referencia[i - 1] / i)
-        resultados_por_grau[0] += -(resultados_por_grau[i] * pow(dados["prop_comuns"]["base"], i))  # Valor máximo
+        resultados_por_grau[0] += -(resultados_por_grau[i] * pow(dados["prop_comuns"]["envergadura"], i))  # Valor máximo
 
     return resultados_por_grau  # Retorna uma lista
 
 
-def calcular_longarina(configuracao):
+def calcular_longarina(material, configuracao):
     # Integrais
     valor_por_grau = [112.4, 31.93, -589.8, 2607, -5689, 5779, -2231]  # O índice corresponde ao grau
     esforco_cortante = integral(valor_por_grau)
@@ -28,15 +28,15 @@ def calcular_longarina(configuracao):
     print(f'Momento fletor máximo: {momento_fletor[0]}')
 
     # Tensão admissível
-    tensao_admissivel_flexao = dados[configuracao]["tensao_esc_flexao"] / dados["prop_comuns"]["fator_seguranca"]
-    tensao_admissivel_cisalhamento = dados[configuracao]["tensao_esc_cisalhamento"] \
+    tensao_admissivel_flexao = dados[material]["tensao_esc_flexao"] / dados["prop_comuns"]["fator_seguranca"]
+    tensao_admissivel_cisalhamento = dados[material]["tensao_esc_cisalhamento"] \
                                      / dados["prop_comuns"]["fator_seguranca"]
 
     # Dados iniciais para o 'loop'
     tensao_cisalhamento = tensao_admissivel_cisalhamento + 1
     tensao_flexao = tensao_admissivel_flexao + 1
 
-    if "circular" in configuracao:
+    if configuracao == "circular" :
         raio_externo = 6
 
         # Procura pelo melhor peso
@@ -49,7 +49,7 @@ def calcular_longarina(configuracao):
 
             area_circular = ((pow(raio_externo, 2) * pi) - (pow(raio_interno, 2) * pi))
 
-            massa = dados["prop_comuns"]["base"] * 2000 * area_circular * dados[configuracao]["densidade"]
+            massa = dados["prop_comuns"]["envergadura"] * 2000 * area_circular * dados[material]["densidade"]
 
             # Cálculos das propriedades físicas
             inercia = (pi / 64) * (pow(diametro_externo, 4) - pow(diametro_interno, 4))
@@ -69,21 +69,51 @@ def calcular_longarina(configuracao):
                 "inercia": inercia, "diametro_externo": diametro_externo,
                 "area_circular": area_circular, "massa": massa}
 
-    elif "retangular" in configuracao:
+    elif configuracao == "caixao" :
         # TODO: descobrir os limites e proporções
         largura = 1
         altura = 40
 
         while tensao_cisalhamento > tensao_admissivel_cisalhamento or tensao_flexao > tensao_admissivel_flexao:
             # Calculos das dimensões
-            area_retangular = largura * altura
+            area_retangular = largura * altura - ((largura - (2 * dados[material]["espessura"]))
+                                                  * (altura - (2 * dados[material]["espessura"])))
 
-            massa = (dados["prop_comuns"]["base"] * 2000 * area_retangular) * dados[configuracao]["densidade"]
+            massa = (dados["prop_comuns"]["envergadura"] * 2000 * area_retangular) * dados[material]["densidade"]
 
             # Cálculos das propriedades físicas
-            inercia = (largura * pow(altura, 3)) / 12
+            inercia = ((largura * pow(altura, 3)) / 12) \
+                      - (((largura - (2 * dados[material]["espessura"]))
+                          * pow((altura - (2 * dados[material]["espessura"])), 3)) / 12)
 
-            tensao_cisalhamento = (1.5 * dados["prop_comuns"]["base"] * area_retangular) / area_retangular
+            tensao_cisalhamento = (1.5 * dados["prop_comuns"]["envergadura"] * area_retangular) / area_retangular
+
+            tensao_flexao = (momento_fletor[0] * 1000 * (altura / 2)) / inercia
+
+            altura += 0.01  # Nova altura a ser testada
+            largura += 0.01  # Nova largura a ser testada
+
+        return {"tensao flexivel": tensao_flexao, "tensao_cisalhamento": tensao_cisalhamento,
+                "tensao_admissivel_cislhamento": tensao_admissivel_cisalhamento,
+                "tensao_admissivel_flexao": tensao_admissivel_flexao,
+                "inercia": inercia, "largura": largura, "altura": altura,
+                "area_retangula": area_retangular, "massa": massa}
+    
+    elif configuracao == "retangular":
+        # TODO: descobrir os limites e proporções
+        largura = 0.5 
+        altura = 20
+
+        while tensao_cisalhamento > tensao_admissivel_cisalhamento or tensao_flexao > tensao_admissivel_flexao:
+            # Calculos das dimensões
+            area_retangular = largura * altura
+
+            massa = (dados["prop_comuns"]["envergadura"] * 2000 * area_retangular) * dados[material]["densidade"]
+
+            # Cálculos das propriedades físicas
+            inercia = ((largura * pow(altura, 3)) / 12)
+
+            tensao_cisalhamento = (1.5 * dados["prop_comuns"]["envergadura"] * area_retangular) / area_retangular
 
             tensao_flexao = (momento_fletor[0] * 1000 * (altura / 2)) / inercia
 
@@ -98,13 +128,29 @@ def calcular_longarina(configuracao):
 
 
 print("-=-=- Alumínio Circular -=-=-")
-aluminio = calcular_longarina("aluminio_circular")
+aluminio = calcular_longarina("aluminio","circular")
 for i in aluminio:
     print(f"{i}: {aluminio[i]}")
 
+print ()
+
+print("-=-=- Alumínio Retangular -=-=-")
+aluminio_retangular = calcular_longarina("aluminio","retangular")
+for i in aluminio_retangular:
+    print(f"{i}: {aluminio_retangular[i]}")
+
+print ()    
+
+print("-=-=- Carbono Circular -=-=-")
+carbono = calcular_longarina("carbono","circular")
+for i in carbono:
+    print(f"{i}: {carbono[i]}")
+
 print()
 
-print("-=-=- Balsa Retangular -=-=-")
-balsa = calcular_longarina("balsa_retangular")
+print("-=-=- Balsa Retangular Caixão -=-=-")
+balsa = calcular_longarina("balsa","caixao")
 for i in balsa:
     print(f"{i}: {balsa[i]}")
+
+ 
