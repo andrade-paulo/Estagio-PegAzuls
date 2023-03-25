@@ -1,0 +1,33 @@
+{
+
+    "aileron": {
+        "area_asa": 1.4360 ,
+        "n_maximo" : 2.40,
+        "w_aileron": 12.6 ,
+        "base_aileron": 48 ,  
+        "altura_aileron": 12
+        
+    },
+
+    "profundor": {
+        "corda_empenagem_horizontal" : 20 ,
+        "maior_carga_eh" : 40.48,
+        "corda_profundor" : 5,
+        "base_profundor" : 80,
+        "altura_profundor": 4.5 
+    },
+
+    "leme": {
+        "area_empenagem_vertical": 210 ,
+        "area_leme" : 66.7,
+        "base_leme" : 13 ,
+        "altura_leme": 2.5 ,
+        "carga_ev_rajada" : 0.47
+
+    }
+           
+
+    
+
+}
+
