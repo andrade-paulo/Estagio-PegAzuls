@@ -1,24 +1,45 @@
 {
-    "aileron": {
+    "aileron2022": {
         "area_asa": 0.984,
-        "n_maximo": 2.40,
-        "w_aileron": 12.6 ,
-        "base_aileron": 0.48,
-        "altura_aileron": 0.12
+        "fator_carga_maxima": 2.40,
+        "massa": 12.6 ,
+        "base": 0.48,
+        "altura": 0.12
     },
-    "profundor": {
-        "corda_empenagem_horizontal": 0.2,
-        "maior_carga_eh": 40.48,
-        "corda_profundor": 0.05,
-        "base_profundor": 0.8,
-        "altura_profundor": 0.045
+    "profundor2022": {
+        "maior_carga_emp_hor": 40.48,
+        "corda_emp_hor": 0.2,
+        "corda": 0.05,
+        "base": 0.8,
+        "altura": 0.045
     },
-    "leme": {
-        "area_empenagem_vertical": 0.021,
-        "area_leme": 0.00325,
-        "carga_ev_rajada": 0.47,
-        "base_leme": 0.13,
-        "altura_leme": 0.025
+    "leme2022": {
+        "area_emp_vert": 0.021,
+        "area": 0.00325,
+        "carga_rajada_emp_vert": 0.47,
+        "base": 0.13,
+        "altura": 0.025
+    },
+    "aileron2021": {
+        "area_asa": 1.436,
+        "fator_carga_maxima": 2.33,
+        "massa": 21.5,
+        "base": 0.33,
+        "altura": 0.085
+    },
+    "profundor2021": {
+        "maior_carga_emp_hor": 140.18,
+        "corda_emp_hor": 0.25,
+        "corda": 0.1,
+        "base": 1.44,
+        "altura": 0.1
+    },
+    "leme2021": {
+        "area_emp_vert": 0.0875,
+        "area": 0.02975,
+        "carga_rajada_emp_vert": 24.51,
+        "base": 0.25,
+        "altura": 0.085
     }
 }
 

@@ -1,80 +1,89 @@
 import json
 
 # Carregamento das informações do JSON na variável dados
-with open('./inputs.json', 'r') as f: 
+with open('./inputs.json', 'r') as f:
     dados = json.load(f)
 
-# -------------------------------------- Torque do Aileron ----------------------------------------------------
 
-# Área do Aileron
-area_aileron = dados["aileron"]["base_aileron"] * dados["aileron"]["altura_aileron"]
+def torque_aileron(modelo):
+    area = dados[modelo]["base"] * dados[modelo]["altura"]
 
-# Centróide
-centroide_base = dados["aileron"]["base_aileron"] / 2
-centroide_altura = dados["aileron"]["altura_aileron"] / 2
+    centroide_base = dados[modelo]["base"] / 2
+    centroide_altura = dados[modelo]["altura"] / 2
 
-# Cálculo da Força
-forca = (dados["aileron"]["n_maximo"] * dados["aileron"]["w_aileron"] * area_aileron) / dados["aileron"]["area_asa"]
+    forca = (dados[modelo]["massa"] * dados[modelo]["fator_carga_maxima"] * area) \
+            / dados[modelo]["area_asa"]
 
-# Corda no ponto do centróide
-corda_centroide = dados["aileron"]["altura_aileron"] * 100
+    corda_centroide = dados[modelo]["altura"] * 100
 
-# Cálculo da Distância do Braço do retângulo
-# TODO: conferir se a divisão é por 2 ou por 3
-distancia_retangulo = corda_centroide / 2
+    # TODO: conferir se a divisão é por 2 ou por 3
+    distancia_braco = corda_centroide / 2
 
-# Cálculo do Torque do Aileron (T = F * d) / 2 - Biplano
-torqueA = (forca * distancia_retangulo) / 2
+    # Cálculo do Torque do Aileron (T = F * d) / 2 - Biplano
+    torque = (forca * distancia_braco) / 2
 
-# Output:
-print("Distância: ", distancia_retangulo, "cm")
-print("Força: ", forca, "kgf")
-print("Torque: ", torqueA, "kgf.cm")
+    # Resultados
+    return {"area": area, "centroide_base": centroide_base, "centroide_altura": centroide_altura, "forca": forca,
+            "corda_centroide": corda_centroide, "distancia_braco": distancia_braco, "torque": torque}
 
-# -------------------------------------- Torque do Profundor ----------------------------------------------------
 
-# Área do Profundor
-print()
+def torque_profundor(modelo):
+    carregamento_de_pressao_emp_hor = (2 * dados[modelo]["maior_carga_emp_hor"]) \
+                                      / dados[modelo]["corda_emp_hor"] / 9.81
 
-# Carregamento de pressão na maior corda da eh em kgf (W)
-w_empenagem_horizontal = (2 * dados["profundor"]["maior_carga_eh"]) \
-                         / dados["profundor"]["corda_empenagem_horizontal"] / 9.81
+    carregamento_de_pressao_profundor = (carregamento_de_pressao_emp_hor * dados[modelo]["corda"]) \
+                  / dados[modelo]["corda_emp_hor"]
 
-# Carregamento de pressão na maior corda do profundor (W')
-w_profundor = (w_empenagem_horizontal * dados["profundor"]["corda_profundor"]) \
-              / dados["profundor"]["corda_empenagem_horizontal"]
+    forca = (dados[modelo]["corda"] * carregamento_de_pressao_profundor) / 2
 
-# Força do Profundor
-forca_profundor = (dados["profundor"]["corda_profundor"] * w_profundor) / 2
+    # TODO: conferir se é a altura ou a corda do profundor
+    distancia_braco = dados[modelo]["altura"] * 100 / 3
 
-# Distância do Braço
-# TODO: conferir se é a altura ou a corda do profundor
-distancia_bracoP = dados["profundor"]["altura_profundor"] * 100 / 3
+    torque = forca * distancia_braco
 
-# Torque do Profundor (T = F * d)
-torqueP = forca_profundor * distancia_bracoP
+    # Resultados
+    return {"carregamento_de_pressao_emp_hor": carregamento_de_pressao_emp_hor,
+            "carregamento_de_pressao_profundor": carregamento_de_pressao_profundor,
+            "forca": forca, "distancia_braco": distancia_braco, "torque": torque}
 
-print("Distância: ", distancia_bracoP, "cm")
-print("Força: ", forca_profundor, "kgf")
-print("Torque do Profundor: ", torqueP, "kgf.cm")
 
-# --------------------------------------- Torque do Leme ----------------------------------------------------
+def torque_leme(modelo):
+    area = dados[modelo]["area"] / dados[modelo]["area_emp_vert"]
 
-print()
-# Proporção de Área entre Empenagem Vertical e Leme
-area = dados["leme"]["area_leme"] / dados["leme"]["area_empenagem_vertical"]
-print(area)
+    # TODO: conferir divisão pela gravidade
+    forca = area * dados[modelo]["carga_rajada_emp_vert"] / 9.81
 
-# Cálculo da Força do Leme
-# TODO: conferir divisão pela gravidade
-forca_leme = area * dados["leme"]["carga_ev_rajada"] / 9.81
+    distancia_braco = dados[modelo]["altura"] * 100 / 2
 
-# Distância do braço
-distancia_bracoL = dados["leme"]["altura_leme"] * 100 / 2
+    torque = forca * distancia_braco
 
-# Torque do Leme
-torqueL = forca_leme * distancia_bracoL
+    # Resultados
+    return {"area": area, "forca": forca, "distancia_braco": distancia_braco, "torque": torque}
 
-print("Distância: ", distancia_bracoL, "cm")
-print("Força: ", forca_leme, "kgf")
-print("Torque do Leme: ", torqueL, "kgf.cm")
+
+def exibir(conteudo):
+    for i in conteudo:
+        print(f"{i}: {conteudo[i]}")
+    print()
+
+
+# -=-=- OUTPUT -=-=-
+print("\33[92m-=-=- Modelo 2022 -=-=-\33[m")
+print("-> Aileron")
+exibir(torque_aileron("aileron2022"))
+
+print("-> Profundor")
+exibir(torque_profundor("profundor2022"))
+
+print("-> Leme")
+exibir(torque_leme("leme2022"))
+
+print("\33[92m-=-=- Modelo 2021 -=-=-\33[m")
+print("-> Aileron")
+exibir(torque_aileron("aileron2021"))
+
+print("-> Profundor")
+exibir(torque_profundor("profundor2021"))
+
+print("-> Leme")
+exibir(torque_leme("leme2021"))
