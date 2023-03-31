@@ -9,7 +9,7 @@
     "profundor2022": {
         "maior_carga_emp_hor": 40.48,
         "corda_emp_hor": 0.2,
-        "corda": 0.05,
+        "corda": 0.045,
         "base": 0.8,
         "altura": 0.045
     },

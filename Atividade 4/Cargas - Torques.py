@@ -16,8 +16,7 @@ def torque_aileron(modelo):
 
     corda_centroide = dados[modelo]["altura"] * 100
 
-    # TODO: conferir se a divisão é por 2 ou por 3
-    distancia_braco = corda_centroide / 2
+    distancia_braco = corda_centroide / 3
 
     # Cálculo do Torque do Aileron (T = F * d) / 2 - Biplano
     torque = (forca * distancia_braco) / 2
@@ -36,7 +35,6 @@ def torque_profundor(modelo):
 
     forca = (dados[modelo]["corda"] * carregamento_de_pressao_profundor) / 2
 
-    # TODO: conferir se é a altura ou a corda do profundor
     distancia_braco = dados[modelo]["altura"] * 100 / 3
 
     torque = forca * distancia_braco
@@ -50,7 +48,6 @@ def torque_profundor(modelo):
 def torque_leme(modelo):
     area = dados[modelo]["area"] / dados[modelo]["area_emp_vert"]
 
-    # TODO: conferir divisão pela gravidade
     forca = area * dados[modelo]["carga_rajada_emp_vert"] / 9.81
 
     distancia_braco = dados[modelo]["altura"] * 100 / 2
