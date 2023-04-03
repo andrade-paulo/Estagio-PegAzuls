@@ -1,7 +1,6 @@
 {
     "asa_2022": {
         "C_angular_curva_CLxAlfa": 0.09339,
-        "posicao_CG_corda_media": 0.28,
         "posicao_centro_aerod_corda_media": 0.288157,
         "C_momento_redor_centro": -0.641616,
         "C_sustentacao_angulo_ataque_nulo": 1.737315
