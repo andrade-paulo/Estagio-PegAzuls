@@ -177,7 +177,8 @@ def exportar_resultados(resultados, nome_arquivo):
 
 
 # -=-=- OUTPUT -=-=-
-casos_estaveis = calcular_estabilidade("asa_2022", "empenagem_horizontal_2022", "fuselagem_2022", 0.25, 0.33, )
+
+casos_estaveis = calcular_estabilidade("asa_2022", "empenagem_horizontal_2022", "fuselagem_2022", 0.25, 0.33)
 exportar_resultados(casos_estaveis, "casos_estaveis")
 
 # Gráficos
