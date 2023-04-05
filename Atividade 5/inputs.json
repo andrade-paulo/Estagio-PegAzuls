@@ -21,9 +21,7 @@
     "fuselagem_2022": {
         "area_asa": 1.325,
         "corda_media_aerod_asa": 0.49,
-        "fatores_correcao_fuselagem": 1,
-        "soma1": 0.0000927632,
-        "soma2": -0.012771839
+        "fatores_correcao_fuselagem": 1
     }
 }
 
