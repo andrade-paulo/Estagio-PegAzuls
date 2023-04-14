@@ -24,7 +24,7 @@ def calcular_velocidades(vel_inicial, vel_final):
         cl_dividido_cd = cl / cd
         tr = 0.5 * inputs["p"] * pow(v, 2) * inputs["S"] * cd
         td = 0.0079 * pow(v, 2) - 1.4194 * v + 46.229
-        tr_menos_td = tr - td
+        tr_menos_td = abs(tr - td)
         pr = v * tr
         pd = v * td
         d0 = 0.5 * inputs["p"] * inputs["S"] * inputs["CD0"] * pow(v, 2)
@@ -48,9 +48,9 @@ def estimar_velocidades(velocidades):
     resultados = pandas.DataFrame(resultados)
 
     # Cálculos dos resultados
-    vmax = velocidades.loc[velocidades["Td-Tr"].idxmax(), "v"]
-    vmin = velocidades.loc[velocidades["Td-Tr"].idxmin(), "v"]
-    vstall = math.sqrt((2 * inputs["W"]) / (inputs["p"] * inputs["S"] * inputs["CD0"]))
+    vmax = velocidades.loc[velocidades.loc[velocidades["v"] >= 15, "Td-Tr"].idxmin(), "v"]
+    vmin = velocidades.loc[velocidades.loc[velocidades["v"] < 15, "Td-Tr"].idxmin(), "v"]
+    vstall = math.sqrt((2 * inputs["W"]) / (inputs["p"] * inputs["S"] * inputs["Clmax"]))
     vcru = vmax * 0.9
     vd = vmax * 1.25
 
@@ -118,7 +118,13 @@ def gerar_graficos(valores):
     plt.close()
 
 
-tabela_velocidades = calcular_velocidades(0.01, 31)
+# Tabelas para planilha e gráficos
+tabela_velocidades = calcular_velocidades(0.01, 30.5)
+tabela_resumida = calcular_velocidades(6, 35)
+
+# Formatação do output
 outputs = estimar_velocidades(tabela_velocidades)
-gerar_graficos(tabela_velocidades)
+gerar_graficos(tabela_resumida)
 exportar_resultados(tabela_velocidades, outputs, "resultado")
+print("\33[92mCódigo executado com sucesso!\33[m")
+print("Confira os resultados no arquivo `resultados.xlsx` e na pasta /graficos")
