@@ -1,17 +1,24 @@
 import json
 import pandas
 import matplotlib.pyplot as plt
+import math
+
+
+def carregar_inputs():
+    with open("inputs.json") as f:
+        return json.load(f)
 
 
 def calcular_velocidades(vel_inicial, vel_final):
-    with open("inputs.json") as f:
-        inputs = json.load(f)
+    inputs = carregar_inputs()
 
+    # Inicialização do Dataframe
     resultados = {"Cl": [], "Cd": [], "Tr": [], "Td": [], "Td-Tr": []}
     resultados = pandas.DataFrame(resultados)
 
     v = vel_inicial
     while v <= vel_final:
+        # Cálculos dos resultados
         cl = (2 * inputs["W"]) / (inputs["p"] * inputs["S"] * pow(v, 2))
         cd = inputs["CD0"] + inputs["K"] * pow(cl, 2)
         cl_dividido_cd = cl / cd
@@ -23,19 +30,42 @@ def calcular_velocidades(vel_inicial, vel_final):
         d0 = 0.5 * inputs["p"] * inputs["S"] * inputs["CD0"] * pow(v, 2)
         di = 0.5 * inputs["p"] * inputs["S"] * inputs["K"] * pow(cl, 2) * pow(v, 2)
 
-        # Dataframe com os resultados com índice v
-        resultados = resultados.append({"v": v, "Cl": cl, "Cd": cd, "Cl/Cd": cl_dividido_cd, "Tr": tr, "Td": td, "Td-Tr": tr_menos_td, "Pr": pr,
-                                        "Pd": pd, "D0": d0, "Di": di}, ignore_index=True)
+        # Adição dos resultados ao Dataframe
+        resultados = resultados.append(
+            {"v": v, "Cl": cl, "Cd": cd, "Cl/Cd": cl_dividido_cd, "Tr": tr, "Td": td, "Td-Tr": tr_menos_td, "Pr": pr,
+             "Pd": pd, "D0": d0, "Di": di}, ignore_index=True)
 
-        v += 0.01
+        v += 0.01  # Atualização da velocidade
 
     return resultados
 
 
-def exportar_resultados(valores, nome_arquivo):
+def estimar_velocidades(velocidades):
+    inputs = carregar_inputs()
+
+    # Inicialização do Dataframe
+    resultados = {"Vmax": [], "Vmin": [], "Vstall": [], "Vcru": [], "Vd": []}
+    resultados = pandas.DataFrame(resultados)
+
+    # Cálculos dos resultados
+    vmax = velocidades.loc[velocidades["Td-Tr"].idxmax(), "v"]
+    vmin = velocidades.loc[velocidades["Td-Tr"].idxmin(), "v"]
+    vstall = math.sqrt((2 * inputs["W"]) / (inputs["p"] * inputs["S"] * inputs["CD0"]))
+    vcru = vmax * 0.9
+    vd = vmax * 1.25
+
+    # Adição dos resultados ao Dataframe
+    resultados = resultados.append({"Vmax": vmax, "Vmin": vmin, "Vstall": vstall,
+                                    "Vcru": vcru, "Vd": vd}, ignore_index=True)
+
+    return resultados
+
+
+def exportar_resultados(tabela, outputs_finais, nome_arquivo):
     # Exportar resultados para Excel
     writer = pandas.ExcelWriter(f"{nome_arquivo}.xlsx", engine="xlsxwriter")
-    valores.to_excel(writer, sheet_name="Resultados")
+    tabela.to_excel(writer, sheet_name="Velocidades")
+    outputs_finais.to_excel(writer, sheet_name="Outputs")
     writer.save()
 
 
@@ -88,6 +118,7 @@ def gerar_graficos(valores):
     plt.close()
 
 
-velocidades = calcular_velocidades(6, 35)
-gerar_graficos(velocidades)
-exportar_resultados(velocidades, "resultado")
+tabela_velocidades = calcular_velocidades(0.01, 31)
+outputs = estimar_velocidades(tabela_velocidades)
+gerar_graficos(tabela_velocidades)
+exportar_resultados(tabela_velocidades, outputs, "resultado")
