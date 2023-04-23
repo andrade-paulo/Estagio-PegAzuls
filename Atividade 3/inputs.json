@@ -10,7 +10,7 @@
         "espessura": 2,
         "prop_comuns": "@propriedades_comuns"
     },
-           
+
     "aluminio": {
         "tensao_esc_flexao": 244,
         "tensao_esc_cisalhamento": 125,
@@ -23,7 +23,7 @@
         "tensao_esc_cisalhamento": 125,
         "densidade": 0.0018,
         "espessura": 1,
-        "prop_comuns": "@propriedades_comuns" 
+        "prop_comuns": "@propriedades_comuns"
 
     }
 
